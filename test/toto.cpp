@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
 	//socket: (PF_INET || AF_INET (same) ; SOCK_STREAM(TCP) ; id protocol)
 		// -> set by getaddrinfo
-		// return -1 - error ; valid fd - success
+		// return -1 - error ; valid fd(server socket) - success
 	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if (sock == -1)
 	{
@@ -59,11 +59,16 @@ int main(int argc, char *argv[])
 		return (3);
 	}
 
+	//setsockopt: (server socket ; SOL_SOCKET(enable manipulation socket) ; 
+		// REUSEADDR(Bind call should allow reuse same address)
+		// REUSEPORT(Allow socket to be bound to same address))
+			// return -1 - error ; 0 - success
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) == -1 && setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) == -1)
 	{
 		std::cerr << "Setsock Error: " << strerror(errno) << std::endl;
 		return (4);
 	}
+
 	//bind: (socket ; struct sockaddr with address info ; lenght in bytes of address)
 		// -> set by getaddrinfo
 		// return -1 - error ; 0 - success
@@ -73,7 +78,7 @@ int main(int argc, char *argv[])
 		return (5);
 	}
 
-	//listen: (socket ; nb connection allowed in queue)
+	//listen: (server socket ; nb connection allowed in queue)
 		// return -1 - error ; 0 - success
 	if (listen(sock, 5) == -1)
 	{
@@ -82,13 +87,23 @@ int main(int argc, char *argv[])
 	}
 
 	addr_size = sizeof(their_addr);
+	//accept: (server socket ; storage struct ; size of storage struct)
+		//return -1 - error ; valid fd(client socket) - success
 	sock_accept = accept(sock, (struct sockaddr *)&their_addr, &addr_size);
 	if (sock_accept == -1)
 	{
 		std::cerr << "Accept Error: " << strerror(errno) << std::endl;
 		return (7);
 	}
-	
+
+	//send: (client socket, message, length(message), flags)
+		//return -1 - error ; number of byte sent - success
+	if (send(sock_accept, "toto\n", 5, 0) == -1)
+	{
+		std::cerr << "Send Error: " << strerror(errno) << std::endl;
+		return (8);
+	}
+
 	close(sock_accept);
 	close(sock);
 	freeaddrinfo(res); // free the linked list
