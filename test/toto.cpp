@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <iostream>
 #include <cerrno>
+#include <unistd.h>
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +16,10 @@ int main(int argc, char *argv[])
 	char ipstr[INET6_ADDRSTRLEN];
 	void *addr;
 	struct sockaddr_in *ipv4; 
-	int sock;
+	int sock, sock_accept;
+	struct sockaddr_storage their_addr;
+	socklen_t addr_size;
+	const int enable = 1;
 
 	if (argc != 2) {
 		fprintf(stderr,"usage: showip hostname\n");
@@ -51,22 +55,42 @@ int main(int argc, char *argv[])
 	sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if (sock == -1)
 	{
-		std::cout << "Socket Error: " << strerror(errno) << std::endl;
+		std::cerr << "Socket Error: " << strerror(errno) << std::endl;
 		return (3);
 	}
 
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) == -1 && setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) == -1)
+	{
+		std::cerr << "Setsock Error: " << strerror(errno) << std::endl;
+		return (4);
+	}
 	//bind: (socket ; struct sockaddr with address info ; lenght in bytes of address)
 		// -> set by getaddrinfo
 		// return -1 - error ; 0 - success
 	if (bind(sock, res->ai_addr, res->ai_addrlen) == -1)
 	{
-		std::cout << "Bind Error: " << strerror(errno) << std::endl;
-		return (4);
+		std::cerr << "Bind Error: " << strerror(errno) << std::endl;
+		return (5);
 	}
 
-	
-	
+	//listen: (socket ; nb connection allowed in queue)
+		// return -1 - error ; 0 - success
+	if (listen(sock, 5) == -1)
+	{
+		std::cerr << "Listen Error: " << strerror(errno) << std::endl;
+		return (6);
+	}
 
+	addr_size = sizeof(their_addr);
+	sock_accept = accept(sock, (struct sockaddr *)&their_addr, &addr_size);
+	if (sock_accept == -1)
+	{
+		std::cerr << "Accept Error: " << strerror(errno) << std::endl;
+		return (7);
+	}
+	
+	close(sock_accept);
+	close(sock);
 	freeaddrinfo(res); // free the linked list
 
 	return 0;
