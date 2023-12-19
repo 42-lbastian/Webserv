@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cerrno>
 #include <unistd.h>
+#include <vector>
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
 	struct sockaddr_storage their_addr;
 	socklen_t addr_size;
 	const int enable = 1;
+	int size;
 
 	if (argc != 2) {
 		fprintf(stderr,"usage: showip hostname\n");
@@ -69,7 +71,7 @@ int main(int argc, char *argv[])
 		return (4);
 	}
 
-	//bind: (socket ; struct sockaddr with address info ; lenght in bytes of address)
+	//bind: (server socket ; struct sockaddr with address info ; lenght in bytes of address)
 		// -> set by getaddrinfo
 		// return -1 - error ; 0 - success
 	if (bind(sock, res->ai_addr, res->ai_addrlen) == -1)
@@ -87,23 +89,41 @@ int main(int argc, char *argv[])
 	}
 
 	addr_size = sizeof(their_addr);
-	//accept: (server socket ; storage struct ; size of storage struct)
-		//return -1 - error ; valid fd(client socket) - success
-	sock_accept = accept(sock, (struct sockaddr *)&their_addr, &addr_size);
-	if (sock_accept == -1)
-	{
-		std::cerr << "Accept Error: " << strerror(errno) << std::endl;
-		return (7);
-	}
+		//accept: (server socket ; storage struct ; size of storage struct)
+			//return -1 - error ; valid fd(client socket) - success
+		sock_accept = accept(sock, (struct sockaddr *)&their_addr, &addr_size);
+		if (sock_accept == -1)
+		{
+			std::cerr << "Accept Error: " << strerror(errno) << std::endl;
+			return (7);
+		}
 
-	//send: (client socket, message, length(message), flags)
-		//return -1 - error ; number of byte sent - success
-	if (send(sock_accept, "toto\n", 5, 0) == -1)
+	while (1)
 	{
-		std::cerr << "Send Error: " << strerror(errno) << std::endl;
-		return (8);
-	}
+        if (!fork())
+		{ // this is the child process
+            close(sock); // child doesn't need the listener
+			std::vector<char> buff_recv(1);
+			if ((size = recv(sock_accept, buff_recv.data(), buff_recv.size(), 0)) == -1)
+			{
+				std::cerr << "Recv Error: " << strerror(errno) << std::endl;
+				return (8);
+			}
+	
+			//send: (client socket, message, length(message), flags)
+				//return -1 - error ; number of byte sent - success
+			if (send(sock_accept, buff_recv.data(), buff_recv.size(), 0) == -1)
+			{
+				std::cerr << "Send Error: " << strerror(errno) << std::endl;
+				return (9);
+			}
+            close(sock_accept);
+            _exit(0);
+        }
 
+
+
+	}
 	close(sock_accept);
 	close(sock);
 	freeaddrinfo(res); // free the linked list
