@@ -123,23 +123,23 @@ int main(int argc, char *argv[])
 
 	while (1)
 	{
-		epoll_wait_ret = epoll_wait(fd_epoll, &event, 10, -1);
-		if (epoll_wait_ret == -1)
-		{
-			std::cerr << "Epoll_wait fail" << std::endl;
-			return (1);
-		}
+		//epoll_wait_ret = epoll_wait(fd_epoll, &event, 10, -1);
+		//if (epoll_wait_ret == -1)
+		//{
+		//	std::cerr << "Epoll_wait fail" << std::endl;
+		//	return (1);
+		//}
 
-		if (event.data.fd ==  sock_accept)
-		{
+		//if (event.data.fd ==  sock_accept)
+		//{
 			if ((size = recv(sock_accept, buff_recv.data(), buff_recv.size(), 0)) == -1)
 			{
 				std::cerr << "Recv Error: " << strerror(errno) << std::endl;
 				return (1);
 			}
-		}
-		else
-		{
+		//}
+		//else
+		//{
 			//send: (client socket, message, length(message), flags)
 				//return -1 - error ; number of byte sent - success
 			if (send(sock_accept, buff_recv.data(), buff_recv.size(), 0) == -1)
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 				std::cerr << "Send Error: " << strerror(errno) << std::endl;
 				return (1);
 			}
-		}
+		//}
 	}
 	close(sock_accept);
 	close(sock);

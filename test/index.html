@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+        $(document).ready(function(){
+          $("button").click(function(){
+            $.get("http://127.0.0.1:4141", function(){
+                console.log("Request Get worked");
+            });
+          });
+        });
+        </script>
+        -->
+    </head>
+    <body>
+        <button type="button" onclick="send_request()" >Send request</button>
+    
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+            function send_request()
+            {
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:4141",
+                    crossDomain: true,
+                    async: true,
+                    success: function(){
+                        console.log("Request GET worked");
+                    }
+                })
+            }
+        </script>
+    </body>
+</html>
