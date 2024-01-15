@@ -1,36 +1,54 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <!--
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script>
-        $(document).ready(function(){
-          $("button").click(function(){
-            $.get("http://127.0.0.1:4141", function(){
-                console.log("Request Get worked");
-            });
-          });
-        });
-        </script>
-        -->
+        <title>Blip Bloup</title>
     </head>
     <body>
-        <button type="button" onclick="send_request()" >Send request</button>
-    
+        <h1>Blip Bloup</h1>
+        <button type="button" onclick="send_get_request()" >Send GET request</button>
+        
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script>
-            function send_request()
+            function send_get_request()
+            {
+                /*
+                $.ajax({
+                type: "GET",
+                url: "http://127.0.0.1:4141",
+                async: true,
+                }).done(function () {
+                    alert("Request GET success");           
+                })
+                .fail(function () {
+                    alert("Request GET fail");    
+                });
+                */
+                fetch("https://google.com")
+                .then(response => {
+                    const setCookieHeader = response.headers.get('Set-Cookie');
+                    alert(setCookieHeader);
+                    console.log(setCookieHeader);
+                    //if (setCookieHeader)
+                    //{
+                        //const cookies = parse_cookies(setCookieHeader);
+                    //}
+                })
+                .catch(error => alert("Request GET fail: " + error));
+            }
+            /*
+            function send_post_request()
             {
                 $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "http://127.0.0.1:4141",
-                    crossDomain: true,
                     async: true,
-                    success: function(){
-                        console.log("Request GET worked");
-                    }
-                })
+                    success: function(data)
+                    {
+                        alert(data);
+                    }            
+                });
             }
+            */
         </script>
     </body>
 </html>
