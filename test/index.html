@@ -7,7 +7,7 @@
         <h1>Blip Bloup</h1>
         <button type="button" onclick="send_get_request()" >Send GET request</button>
         <ul></ul>
-        
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script>
             function send_get_request()
@@ -21,8 +21,9 @@
                     if (setCookieHeader)
                     {
                         const cookies = setCookieHeader.split(';');
-                        
+                        return ("Toto");
                     }
+
                 })
                 .then(data => {
                     alert("Response: " + data);
@@ -33,7 +34,7 @@
 
 
 
-            
+
             /*
             function send_post_request()
             {
@@ -44,7 +45,7 @@
                     success: function(data)
                     {
                         alert(data);
-                    }            
+                    }
                 });
             }
             */
@@ -54,10 +55,10 @@
                 url: "http://127.0.0.1:4141",
                 async: true,
                 }).done(function () {
-                    alert("Request GET success");           
+                    alert("Request GET success");
                 })
                 .fail(function () {
-                    alert("Request GET fail");    
+                    alert("Request GET fail");
                 });
                 */
         </script>
