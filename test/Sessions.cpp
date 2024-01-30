@@ -6,11 +6,12 @@
 /*   By: lbastian <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/11 17:07:16 by lbastian          #+#    #+#             */
-/*   Updated: 2024/01/15 14:13:28 by lbastian         ###   ########.fr       */
+/*   Updated: 2024/01/30 16:26:11 by lbastian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Sessions.hpp"
+#include <sstream>
 
 Sessions::Sessions(void)
 {
@@ -20,30 +21,42 @@ Sessions::~Sessions(void)
 {
 }
 
-int Sessions::create_token(void)
+std::string Sessions::create_token(void)
 {
-	return (_sessions_data.size() + 1);
+	std::string str;
+	std::map<std::string, time_t>::iterator it;
+	time_t currentTime;
+
+	while (1)
+	{
+		currentTime = time(NULL);
+    	std::stringstream timeStream;
+    	timeStream << currentTime;
+		str = timeStream.str() + ft::itos(_sessions_data.size() + 1);
+
+		it = _sessions_data.find(str);
+		if (it == _sessions_data.end())
+			break;
+	}
+	return (str);
 }
 
-void Sessions::add(std::string username, int token, time_t date)
+void Sessions::add(std::string token, time_t date)
 {
-	_sessions_data[username].insert(std::make_pair(token, date));
+	_sessions_data[token] = date;
 }
 
-bool Sessions::verify(std::string username, int token)
+bool Sessions::verify(std::string token)
 {
-	std::map<std::string, std::map<int, time_t> >::iterator it;
+	std::map<std::string, time_t>::iterator it;
 	std::map<int, time_t>::iterator it_inside;
 	time_t actual;
-
-	it = _sessions_data.find(username);
+	
+	it = _sessions_data.find(token);
 	if (it == _sessions_data.end())
 		return (false);
-	it_inside = it->second.find(token);
-	if (it_inside == it->second.end())
-		return (false);
 	actual = time(0);
-	if (it_inside->second < actual)
+	if (_sessions_data[token] < actual)
 		return (false);
 	return (true);
 }
@@ -76,4 +89,9 @@ time_t Sessions::get_time_t(int sec, int min, int hour, int day, int month, int 
 	tm.tm_year = year - 1900;
 	result = mktime(&tm);
 	return (result);
+}
+
+void Sessions::print_ses(void)
+{
+	std::cout << _sessions_data.begin()->first << std::endl;
 }
